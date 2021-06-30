@@ -61,12 +61,10 @@ It is possible to modify data in arrays, e.g.:
 }
 ```
 
-```bash
-sde pools.0.pass secret data.json
-```
+Update first pool's `pass` value to value `secret`:
 
 ```bash
-echo $json | sde name Jack
+sde pools.0.pass secret data.json
 ```
 
 ### Query simple data
@@ -88,4 +86,10 @@ Installing with `pip` is easiest:
 
 ```bash
 pip install sde
+```
+
+## TODO
+
+```bash
+echo $json | sde name Jack
 ```
