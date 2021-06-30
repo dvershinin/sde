@@ -67,12 +67,6 @@ Update first pool's `pass` value to value `secret`:
 sde pools.0.pass secret data.json
 ```
 
-### Query simple data
-
-```bash
-sdg name data.json
-```
-
 ## Installation for CentOS/RHEL 7, 8 or Amazon Linux 2
 
 ```bash
@@ -90,6 +84,14 @@ pip install sde
 
 ## TODO
 
+### Work with stdin
+
 ```bash
 echo $json | sde name Jack
+```
+
+### Query simple data
+
+```bash
+sdg name data.json
 ```
