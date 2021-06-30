@@ -1,5 +1,7 @@
 # sde
 
+[![PyPI version](https://badge.fury.io/py/sde.svg)](https://badge.fury.io/py/sde)
+
 `sde` is not `sed`. It's a structured data editor for CLI.
 
 ## Why?
@@ -35,6 +37,31 @@ It allows *simple* in-place JSON value changes, for *simple* data.
 ```bash
 sde name Jack data.json
 sde extra.sex female data.json
+```
+
+It is possible to modify data in arrays, e.g.:
+
+```json
+{
+    "pools": [
+        {
+            "tls": false, 
+            "rig-id": null, 
+            "nicehash": false, 
+            "url": "pool.hashvault.pro:80", 
+            "user": "YOUR_WALLET_ADDRESS", 
+            "pass": "x", 
+            "enabled": true, 
+            "daemon": false, 
+            "algo": null, 
+            "tls-fingerprint": null, 
+            "keepalive": false
+        }
+    ],
+}
+```
+
+```bash
 sde pools.0.pass secret data.json
 ```
 
@@ -46,4 +73,19 @@ echo $json | sde name Jack
 
 ```bash
 sdg name data.json
+```
+
+## Installation for CentOS/RHEL 7, 8 or Amazon Linux 2
+
+```bash
+sudo yum -y install https://extras.getpagespeed.com/release-latest.rpm
+sudo yum -y install sde
+```
+   
+## Installation for other systems
+
+Installing with `pip` is easiest:
+
+```bash
+pip install sde
 ```
