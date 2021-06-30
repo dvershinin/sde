@@ -7,7 +7,7 @@ def edit_json(key, value, file):
     try:
         with open(file) as json_file:
             data = json.load(json_file)
-    except FileNotFoundError:
+    except IOError:
         data = {}
     data = DottedDict(data)
     data[key] = value
