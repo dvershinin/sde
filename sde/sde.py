@@ -12,8 +12,13 @@ def edit_json(key, value, file, must_exist=False):
     except IOError:
         data = {}
     data = DottedDict(data)
-    if must_exist and key not in data:
-        raise ValueError('{} is not present in {}'.format(key, file))
+    if must_exist:
+        try:
+            # this is the way I found it works for array vals too
+            # e.g. fruits.0.name
+            data[key]
+        except KeyError:
+            raise ValueError('{} is not present in {}'.format(key, file))
     data[key] = value
     with open(file, 'w') as json_file:
         json_file.write(data.to_json())
