@@ -82,6 +82,22 @@ Installing with `pip` is easiest:
 pip install sde
 ```
 
+## Notes
+
+Quoting is avoided for `null`, `true`, `false` and numeric values.
+To ensure that a given value is quoted, use `-s` (or `--string`) option:
+
+```bash
+sde -s key null file.json
+```
+
+If you must *edit* the file, by ensuring to update only the existing key, use `-e` (`--must-exist`)
+option. The program will exit without adding the key which doesn't exist.
+
+```bash
+sde -e key val file.json
+```
+
 ## TODO
 
 ### Work with stdin
