@@ -13,7 +13,9 @@ import re
 
 _version_re = re.compile(r"__version__\s=\s'(.*)'")
 
-install_requires = []
+install_requires = [
+    "six"
+]
 tests_requires = [
     "pytest>=4.4.0",
     "flake8",
