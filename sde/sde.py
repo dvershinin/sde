@@ -3,6 +3,14 @@ import argparse
 import sys
 from .collection import DottedDict
 
+if sys.version_info.major >= 3:
+    # Python 3
+    unicode = str
+
+
+def isnumeric(s):
+    return unicode(s).isnumeric()
+
 
 def edit_json(key, value, file, must_exist=False):
     import json
@@ -33,7 +41,7 @@ def normalize_val(val):
         return True
     elif val == "false":
         return False
-    elif val.isnumeric():
+    elif isnumeric(val):
         return int(val)
     return val
 
