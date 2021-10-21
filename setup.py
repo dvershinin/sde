@@ -14,7 +14,8 @@ import re
 _version_re = re.compile(r"__version__\s=\s'(.*)'")
 
 install_requires = [
-    "six"
+    "six",
+    "pyyaml"
 ]
 tests_requires = [
     "pytest>=4.4.0",

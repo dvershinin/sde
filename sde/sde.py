@@ -1,7 +1,20 @@
 from __future__ import print_function
 import argparse
 import sys
+import json
+import yaml
+import os.path
+
 from .collection import DottedDict
+
+_JSON = 'JSON'
+_YAML = 'YAML'
+
+_FORMATS = {
+    '.json': _JSON,
+    '.yaml': _YAML,
+    '.yml': _YAML,
+}
 
 if sys.version_info.major >= 3:
     # Python 3
@@ -12,14 +25,8 @@ def isnumeric(s):
     return unicode(s).isnumeric()
 
 
-def edit_json(key, value, file, must_exist=False):
-    import json
-    try:
-        with open(file) as json_file:
-            data = json.load(json_file)
-    except IOError:
-        data = {}
-    data = DottedDict(data)
+def edit_file(key, value, file, fmt, must_exist=False):
+    data = DottedDict(read_file(file, fmt, must_exist))
     if must_exist:
         try:
             # this is the way I found it works for array vals too
@@ -28,8 +35,39 @@ def edit_json(key, value, file, must_exist=False):
         except KeyError:
             raise ValueError('{} is not present in {}'.format(key, file))
     data[key] = value
-    with open(file, 'w') as json_file:
-        json_file.write(data.to_json())
+    write_file(file, fmt, data)
+
+
+def read_file(file, fmt, must_exist):
+    load = {
+        _JSON: json.load,
+        _YAML: yaml.safe_load,
+    }[fmt]
+    try:
+        with open(file) as fd:
+            data = load(fd)
+    except IOError:
+        data = {}
+
+    return data
+
+
+def write_file(file, fmt, data):
+    to = {
+        _JSON: data.to_json,
+        _YAML: data.to_yaml,
+    }[fmt]
+    tmp = file + ".tmp"
+    with os.fdopen(os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL), "w") as fd:
+        try:
+            fd.write(to())
+            fd.close()
+            os.rename(tmp, file)
+        except Exception:
+            # We can assume we can remove it, because we succesfully created
+            # it with O_EXCL above.
+            os.unlink(tmp)
+            raise
 
 
 def normalize_val(val):
@@ -65,9 +103,15 @@ def main():
     if not args.is_string:
         val = normalize_val(args.val)
 
-    if args.file.endswith('.json'):
-        try:
-            edit_json(args.key, val, args.file, must_exist=args.must_exist)
-        except ValueError as e:
-            print("\033[91mError: \033[0m" + str(e), file=sys.stderr)
-            sys.exit(1)
+    extension = os.path.splitext(args.file)
+
+    fmt = _FORMATS.get(extension, None)
+    if fmt is None:
+        print("\033[91mError: \033[0mUnknown extension: " + extension, file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        edit_file(args.key, val, args.file, fmt, must_exist=args.must_exist)
+    except ValueError as e:
+        print("\033[91mError: \033[0m" + str(e), file=sys.stderr)
+        sys.exit(1)
