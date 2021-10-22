@@ -5,4 +5,4 @@
 /.pytest_cache
 *.pyc
 /site/
-
+/.tox

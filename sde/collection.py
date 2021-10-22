@@ -3,6 +3,7 @@
 import collections
 import json
 import re
+import yaml
 
 from abc import ABCMeta, abstractmethod
 
@@ -133,6 +134,9 @@ class DottedCollection(object):
 
     def to_json(self):
         return json.dumps(self, cls=DottedJSONEncoder, indent=4)
+
+    def to_yaml(self):
+        return yaml.dump(self, Dumper=DottedYAMLDumper)
 
     @abstractmethod
     def __getitem__(self, name):
@@ -369,3 +373,24 @@ class DottedJSONEncoder(json.JSONEncoder):
             return obj.store
         else:
             return json.JSONEncoder.default(obj)
+
+#
+# YAML stuff
+#
+
+
+class DottedYAMLDumper(yaml.Dumper):
+    """
+    We could do,
+
+        dumper.add_representer(DottedDict, lambda dumper, data: data.store)
+
+    but we'd have to do it for each type.
+
+    This suggests making a custom dumper for a hiearchy of types:
+        https://github.com/yaml/pyyaml/issues/51
+    """
+    def represent_data(self, data):
+        if isinstance(data, DottedCollection):
+            return self.represent_data(data.store)
+        return super(DottedYAMLDumper, self).represent_data(data)
