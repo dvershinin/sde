@@ -19,7 +19,9 @@ Does this seem readable or elegant to you?
 
 `sde` is not a substitue for `jq` or `sed`.
 
-It allows *simple* in-place JSON value changes, for *simple* data.
+It allows *simple* in-place JSON/YAML value changes, for *simple* data.
+
+### Sample JSON
 
 ```json
 {
@@ -32,11 +34,20 @@ It allows *simple* in-place JSON value changes, for *simple* data.
 }
 ```
 
+### Sample YAML
+
+```yaml
+database:
+  user: example
+  password: secret
+```
+
 ### Modify data
 
 ```bash
 sde name Jack data.json
 sde extra.sex female data.json
+sde database.user john data.yml
 ```
 
 It is possible to modify data in arrays, e.g.:
