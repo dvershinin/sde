@@ -1,5 +1,7 @@
 import os
-from sde import edit_file
+import subprocess
+
+from sde import edit_file, read_file
 
 # change dir to tests directory to make relative paths possible
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -37,3 +39,30 @@ def test_yaml_edit():
     with open(file) as yaml_file:
         data = yaml.safe_load(yaml_file)
         assert data['age'] == 31
+
+
+def test_cli_json():
+    # different filename to facilitate parallel tests
+    file = os.path.dirname(os.path.abspath(__file__)) + '/test-cli.json'
+
+    process = subprocess.Popen(
+        ['sde', "extra.sex", "female", file],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    process.communicate()
+
+    data = read_file(file, 'JSON')
+
+    assert data['extra']['sex'] == 'female'
+
+    process = subprocess.Popen(
+        ['sde', "extra.sex", "male", file],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    process.communicate()
+
+    data = read_file(file, 'JSON')
+
+    assert data['extra']['sex'] == 'male'

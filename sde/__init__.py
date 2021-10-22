@@ -13,7 +13,7 @@ from .__about__ import (
 )
 
 from .sde import main
-from .sde import edit_file
+from .sde import edit_file, read_file
 
 # https://realpython.com/python-logging-source-code/#library-vs-application-logging-what-is-nullhandler
 # when used as library, we default to opt-in approach, whereas library user have to enable logging

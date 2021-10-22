@@ -26,7 +26,7 @@ def isnumeric(s):
 
 
 def edit_file(key, value, file, fmt, must_exist=False):
-    data = DottedDict(read_file(file, fmt, must_exist))
+    data = DottedDict(read_file(file, fmt))
     if must_exist:
         try:
             # this is the way I found it works for array vals too
@@ -38,7 +38,7 @@ def edit_file(key, value, file, fmt, must_exist=False):
     write_file(file, fmt, data)
 
 
-def read_file(file, fmt, must_exist):
+def read_file(file, fmt):
     load = {
         _JSON: json.load,
         _YAML: yaml.safe_load,
@@ -64,7 +64,7 @@ def write_file(file, fmt, data):
             fd.close()
             os.rename(tmp, file)
         except Exception:
-            # We can assume we can remove it, because we succesfully created
+            # We can assume we can remove it, because we successfully created
             # it with O_EXCL above.
             os.unlink(tmp)
             raise
@@ -103,7 +103,7 @@ def main():
     if not args.is_string:
         val = normalize_val(args.val)
 
-    extension = os.path.splitext(args.file)
+    extension = os.path.splitext(args.file)[-1].lower()
 
     fmt = _FORMATS.get(extension, None)
     if fmt is None:
