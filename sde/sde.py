@@ -16,7 +16,7 @@ _FORMATS = {
     '.yml': _YAML,
 }
 
-if sys.version_info.major >= 3:
+if sys.version_info[0] >= 3:
     # Python 3
     unicode = str
 
