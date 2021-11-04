@@ -100,7 +100,9 @@ def main():
     parser.set_defaults(is_string=False, must_exist=False)
     args = parser.parse_args()
 
-    if not args.is_string:
+    if args.is_string:
+        val = args.val
+    else:
         val = normalize_val(args.val)
 
     extension = os.path.splitext(args.file)[-1].lower()
