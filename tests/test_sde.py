@@ -66,3 +66,25 @@ def test_cli_json():
     data = read_file(file, 'JSON')
 
     assert data['extra']['sex'] == 'male'
+
+    process = subprocess.Popen(
+        ['sde', "extra.sex", "true", file],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    process.communicate()
+
+    data = read_file(file, 'JSON')
+
+    assert data['extra']['sex'] is True
+
+    process = subprocess.Popen(
+        ['sde', "-s", "extra.sex", "true", file],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    process.communicate()
+
+    data = read_file(file, 'JSON')
+
+    assert data['extra']['sex'] == 'true'
