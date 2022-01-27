@@ -16,7 +16,16 @@ from .sde import main
 from .sde import edit_file, read_file
 
 # https://realpython.com/python-logging-source-code/#library-vs-application-logging-what-is-nullhandler
-# when used as library, we default to opt-in approach, whereas library user have to enable logging
-# from lastversion
-logging.getLogger(__name__).addHandler(logging.NullHandler())
+# when used as library, we default to opt-in approach, wherein a library user has to enable logging
+# from within their application's code
+# logging.getLogger(__name__).addHandler(logging.NullHandler())
+# the exception handling is for supporting Python 2.6 (RHEL 6.x)
 
+try:
+    from logging import NullHandler
+except ImportError:
+    class NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
+
+logging.getLogger(__name__).addHandler(NullHandler())
