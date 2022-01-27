@@ -17,7 +17,7 @@ jq '.address = "abcde"' test.json|sponge test.json
     
 Does this seem readable or elegant to you?
 
-`sde` is not a substitue for `jq` or `sed`.
+`sde` is not a substitute for `jq` or `sed`.
 
 It allows *simple* in-place JSON/YAML value changes, for *simple* data.
 
@@ -29,7 +29,7 @@ It allows *simple* in-place JSON/YAML value changes, for *simple* data.
    "age":31,
    "city":"New York",
    "extra": {
-       "sex": "male"
+       "gender": null
    }
 }
 ```
@@ -46,7 +46,7 @@ database:
 
 ```bash
 sde name Jack data.json
-sde extra.sex female data.json
+sde extra.gender male data.json
 sde database.user john data.yml
 ```
 
@@ -54,28 +54,23 @@ It is possible to modify data in arrays, e.g.:
 
 ```json
 {
-    "pools": [
+    "users": [
         {
-            "tls": false, 
-            "rig-id": null, 
-            "nicehash": false, 
-            "url": "pool.hashvault.pro:80", 
-            "user": "YOUR_WALLET_ADDRESS", 
-            "pass": "x", 
-            "enabled": true, 
-            "daemon": false, 
-            "algo": null, 
-            "tls-fingerprint": null, 
-            "keepalive": false
-        }
+            "username": "foo", 
+            "enabled": true
+        },
+        {
+            "username": "bar", 
+            "enabled": true
+        }      
     ],
 }
 ```
 
-Update first pool's `pass` value to value `secret`:
+Set the first user's `enabled` property to `false`:
 
 ```bash
-sde pools.0.pass secret data.json
+sde users.0.enabled false data.json
 ```
 
 ## Installation for CentOS/RHEL 7, 8 or Amazon Linux 2
@@ -95,7 +90,7 @@ pip install sde
 
 ## Notes
 
-Quoting is avoided for `null`, `true`, `false` and numeric values.
+Quoting is avoided for `null`, `true`, `false`, and numeric values.
 To ensure that a given value is quoted, use `-s` (or `--string`) option:
 
 ```bash
