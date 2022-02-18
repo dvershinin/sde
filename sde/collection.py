@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import collections
 import json
 import re
-import yaml
-
+import sys
 from abc import ABCMeta, abstractmethod
 
+import yaml
 from six import add_metaclass, string_types as basestring, iteritems
-
+from six.moves import collections_abc
 
 SPLIT_REGEX = r"(?<!\\)(\.)"
 
@@ -55,6 +54,7 @@ def split_key(key, max_keys=0):
 class DottedCollection(object):
     """Abstract Base Class for DottedDict and DottedDict"""
 
+
     @classmethod
     def factory(cls, initial=None):
         """Returns a DottedDict or a DottedList based on the type of the
@@ -68,10 +68,12 @@ class DottedCollection(object):
         else:
             return initial
 
+
     @classmethod
     def load_json(cls, json_value):
         """Returns a DottedCollection from a JSON string"""
         return cls.factory(json.loads(json_value))
+
 
     @classmethod
     def _factory_by_index(cls, dotted_key):
@@ -88,6 +90,7 @@ class DottedCollection(object):
             next_key, tmp = split_key(dotted_key, 1)
 
         return DottedCollection.factory([] if next_key.isdigit() else {})
+
 
     def __init__(self, initial):
         """Base constructor. If there are nested dicts or lists they are
@@ -111,6 +114,7 @@ class DottedCollection(object):
             except ValueError:
                 pass
 
+
     def _validate_initial(self, initial):
         """Validates data so no unescaped dotted key is present."""
         if isinstance(initial, list):
@@ -123,46 +127,57 @@ class DottedCollection(object):
                                      "DottedCollection!".format(key))
                 self._validate_initial(item)
 
+
     def __len__(self):
         return len(self.store)
+
 
     def __iter__(self):
         return iter(self.store)
 
+
     def __repr__(self):
         return repr(self.store)
+
 
     def to_json(self):
         return json.dumps(self, cls=DottedJSONEncoder, indent=4)
 
+
     def to_yaml(self):
         return yaml.dump(self, Dumper=DottedYAMLDumper)
+
 
     @abstractmethod
     def __getitem__(self, name):
         pass
 
+
     @abstractmethod
     def __setitem__(self, name, value):
         pass
 
+
     @abstractmethod
     def __delitem__(self, name):
         pass
+
 
     @abstractmethod
     def to_python(self):
         pass
 
 
-class DottedList(DottedCollection, collections.MutableSequence):
+class DottedList(DottedCollection, collections_abc.MutableSequence):
     """A list with support for the dotted path syntax"""
+
 
     def __init__(self, initial=None):
         DottedCollection.__init__(
             self,
             [] if initial is None else list(initial)
         )
+
 
     def __getitem__(self, index):
         if isinstance(index, slice):
@@ -188,6 +203,7 @@ class DottedList(DottedCollection, collections.MutableSequence):
 
         else:
             raise IndexError('cannot get %s in %s' % (index, repr(self.store)))
+
 
     def __setitem__(self, index, value):
         if isinstance(index, int) \
@@ -219,6 +235,7 @@ class DottedList(DottedCollection, collections.MutableSequence):
             raise IndexError('cannot use %s as index in %s' % (
                 index, repr(self.store)))
 
+
     def __delitem__(self, index):
         if isinstance(index, int) \
                 or (isinstance(index, basestring) and index.isdigit()):
@@ -239,6 +256,7 @@ class DottedList(DottedCollection, collections.MutableSequence):
             raise IndexError('cannot delete %s in %s' % (
                 index, repr(self.store)))
 
+
     def to_python(self):
         """Returns a plain python list and converts to plain python objects all
         this object's descendants.
@@ -251,17 +269,21 @@ class DottedList(DottedCollection, collections.MutableSequence):
 
         return result
 
+
     def insert(self, index, value):
         self.store.insert(index, value)
 
 
-class DottedDict(DottedCollection, collections.MutableMapping):
+class DottedDict(DottedCollection, collections_abc.MutableMapping):
     """A dict with support for the dotted path syntax"""
+
+
     def __init__(self, initial=None):
         DottedCollection.__init__(
             self,
             {} if initial is None else dict(initial)
         )
+
 
     def __getitem__(self, k):
         key = self.__keytransform__(k)
@@ -282,6 +304,7 @@ class DottedDict(DottedCollection, collections.MutableMapping):
 
         return target[alt_key]
 
+
     def __setitem__(self, k, value):
         key = self.__keytransform__(k)
 
@@ -296,6 +319,7 @@ class DottedDict(DottedCollection, collections.MutableMapping):
                 self.store[my_key] = DottedCollection._factory_by_index(alt_key)
 
             self.store[my_key][alt_key] = value
+
 
     def __delitem__(self, k):
         key = self.__keytransform__(k)
@@ -316,6 +340,7 @@ class DottedDict(DottedCollection, collections.MutableMapping):
 
             del target[alt_key]
 
+
     def to_python(self):
         """Returns a plain python dict and converts to plain python objects all
         this object's descendants.
@@ -328,7 +353,9 @@ class DottedDict(DottedCollection, collections.MutableMapping):
 
         return result
 
+
     __getattr__ = __getitem__
+
 
     # self.store does not exist before __init__() initializes it
 
@@ -338,11 +365,13 @@ class DottedDict(DottedCollection, collections.MutableMapping):
         else:
             self.__setitem__(key, value)
 
+
     def __delattr__(self, key):
         if key in self.__dict__ or key == 'store':
             object.__delattr__(self, key)
         else:
             self.__delitem__(key)
+
 
     def __contains__(self, k):
         key = self.__keytransform__(k)
@@ -357,6 +386,7 @@ class DottedDict(DottedCollection, collections.MutableMapping):
             return False
 
         return alt_key in target
+
 
     def __keytransform__(self, key):
         return key
@@ -374,6 +404,7 @@ class DottedJSONEncoder(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(obj)
 
+
 #
 # YAML stuff
 #
@@ -390,6 +421,8 @@ class DottedYAMLDumper(yaml.Dumper):
     This suggests making a custom dumper for a hiearchy of types:
         https://github.com/yaml/pyyaml/issues/51
     """
+
+
     def represent_data(self, data):
         if isinstance(data, DottedCollection):
             return self.represent_data(data.store)
