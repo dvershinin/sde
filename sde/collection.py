@@ -5,9 +5,16 @@ import re
 import sys
 from abc import ABCMeta, abstractmethod
 
+import six
 import yaml
 from six import add_metaclass, string_types as basestring, iteritems
-from six.moves import collections_abc
+# this was only introduced in six 1.13.0, but it's too old in RHEL, 
+# and we don't want to rebuild its package
+# from six.moves import collections_abc
+if six.PY2:
+    import collections as collections_abc
+else:
+    import collections.abc as collections_abc
 
 SPLIT_REGEX = r"(?<!\\)(\.)"
 
