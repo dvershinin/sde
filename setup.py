@@ -14,7 +14,8 @@ import re
 _version_re = re.compile(r"__version__\s=\s'(.*)'")
 
 install_requires = [
-    "six",
+    # collections_abc moves introduced there
+    "six>=1.13.0",
     "pyyaml"
 ]
 tests_requires = [
