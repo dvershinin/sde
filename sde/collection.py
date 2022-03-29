@@ -34,7 +34,7 @@ def split_key(key, max_keys=0):
 
     results in:
 
-    ['', 'dont\.splitme', 'd\.o\. origen', 'splitme\.dontsplit', 'splitme', '']
+    ['', r'dont\.splitme', r'd\.o\. origen', r'splitme\.dontsplit', 'splitme', '']
 
 
     Args:
@@ -406,8 +406,7 @@ class DottedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, DottedCollection):
             return obj.store
-        else:
-            return json.JSONEncoder.default(obj)
+        return json.JSONEncoder.default(obj)
 
 
 #
@@ -426,7 +425,6 @@ class DottedYAMLDumper(yaml.Dumper):
     This suggests making a custom dumper for a hiearchy of types:
         https://github.com/yaml/pyyaml/issues/51
     """
-
 
     def represent_data(self, data):
         if isinstance(data, DottedCollection):
