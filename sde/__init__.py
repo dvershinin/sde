@@ -13,6 +13,8 @@ from .__about__ import (
 )
 
 from .sde import main
+# We intentially import for export here, so it is ok to silence DeepSource test
+# skipcq: PY-W2000
 from .sde import edit_file, normalize_val, read_file
 
 # https://realpython.com/python-logging-source-code/#library-vs-application-logging-what-is-nullhandler

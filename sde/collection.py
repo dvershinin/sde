@@ -2,13 +2,13 @@
 
 import json
 import re
-import sys
 from abc import ABCMeta, abstractmethod
 
 import six
 import yaml
 from six import add_metaclass, string_types as basestring, iteritems
-# this was only introduced in six 1.13.0, but it's too old in RHEL, 
+
+# this was only introduced in six 1.13.0, but it's too old in RHEL,
 # and we don't want to rebuild its package
 # from six.moves import collections_abc
 if six.PY2:
@@ -70,10 +70,9 @@ class DottedCollection(object):
         """
         if isinstance(initial, list):
             return DottedList(initial)
-        elif isinstance(initial, dict):
+        if isinstance(initial, dict):
             return DottedDict(initial)
-        else:
-            return initial
+        return initial
 
 
     @classmethod
@@ -194,7 +193,7 @@ class DottedList(DottedCollection, collections_abc.MutableSequence):
                 or (isinstance(index, basestring) and index.isdigit()):
             return self.store[int(index)]
 
-        elif isinstance(index, basestring) and is_dotted_key(index):
+        if isinstance(index, basestring) and is_dotted_key(index):
             my_index, alt_index = split_key(index, 1)
             target = self.store[int(my_index)]
 
@@ -317,7 +316,7 @@ class DottedDict(DottedCollection, collections_abc.MutableMapping):
 
         if not isinstance(k, basestring):
             raise KeyError('DottedDict keys must be str or unicode')
-        elif not is_dotted_key(key):
+        if not is_dotted_key(key):
             self.store[key] = DottedCollection.factory(value)
         else:
             my_key, alt_key = split_key(key, 1)
