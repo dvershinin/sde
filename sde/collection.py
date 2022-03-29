@@ -156,22 +156,22 @@ class DottedCollection(object):
 
     @abstractmethod
     def __getitem__(self, name):
-        pass
+        raise NotImplementedError
 
 
     @abstractmethod
     def __setitem__(self, name, value):
-        pass
+        raise NotImplementedError
 
 
     @abstractmethod
     def __delitem__(self, name):
-        pass
+        raise NotImplementedError
 
 
     @abstractmethod
     def to_python(self):
-        pass
+        raise NotImplementedError
 
 
 class DottedList(DottedCollection, collections_abc.MutableSequence):
@@ -406,7 +406,7 @@ class DottedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, DottedCollection):
             return obj.store
-        return json.JSONEncoder.default(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 #
