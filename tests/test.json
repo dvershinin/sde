@@ -1,8 +1,9 @@
 {
-    "age": 31,
+    "age": 32,
     "city": "New York",
     "extra": {
         "sex": "male"
     },
-    "name": "John"
+    "name": "John",
+    "balance": -100.25
 }

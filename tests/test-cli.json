@@ -2,7 +2,8 @@
     "age": 31,
     "city": "New York",
     "extra": {
-        "sex": "male"
+        "gender": null,
+        "registered": "true"
     },
     "name": "John"
 }

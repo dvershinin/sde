@@ -21,10 +21,6 @@ if sys.version_info[0] >= 3:
     unicode = str
 
 
-def isnumeric(s):
-    return unicode(s).isnumeric()
-
-
 def edit_file(key, value, file, fmt, must_exist=False):
     data = DottedDict(read_file(file, fmt))
     if must_exist:
@@ -75,12 +71,23 @@ def normalize_val(val):
     https://google.github.io/styleguide/jsoncstyleguide.xml#Double_Quotes"""
     if val == "null":
         return None
-    elif val == "true":
+
+    if val == "true":
         return True
-    elif val == "false":
+
+    if val == "false":
         return False
-    elif isnumeric(val):
+
+    try:
         return int(val)
+    except ValueError:
+        pass
+
+    try:
+        return float(val)
+    except ValueError:
+        pass
+
     return val
 
 

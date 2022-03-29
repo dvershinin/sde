@@ -1,4 +1,5 @@
-age: 31
+age: 32
+balance: -100.25
 city: New York
 extra:
   sex: male
