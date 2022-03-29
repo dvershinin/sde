@@ -29,7 +29,7 @@ def split_key(key, max_keys=0):
 
     Splitting this complex key:
 
-    complex_key = ".dont\.splitme.d\.o\. origen.splitme\.dontsplit.splitme."
+    complex_key = r".dont\.splitme.d\.o\. origen.splitme\.dontsplit.splitme."
     split_key(complex_key)
 
     results in:
@@ -207,8 +207,7 @@ class DottedList(DottedCollection, collections_abc.MutableSequence):
 
             return target[alt_index]
 
-        else:
-            raise IndexError('cannot get %s in %s' % (index, repr(self.store)))
+        raise IndexError('cannot get %s in %s' % (index, repr(self.store)))
 
 
     def __setitem__(self, index, value):

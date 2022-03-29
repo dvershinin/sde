@@ -31,3 +31,6 @@ except ImportError:
             pass
 
 logging.getLogger(__name__).addHandler(NullHandler())
+
+if __name__ == "__main__":
+    main()
