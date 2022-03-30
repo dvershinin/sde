@@ -5,6 +5,7 @@ import json
 import yaml
 import os.path
 
+from .__about__ import __version__
 from .collection import DottedDict
 
 _JSON = 'JSON'
@@ -104,6 +105,8 @@ def main():
                         help='Throw error and exit if the key does not already exist')
     parser.add_argument('-s', '--string', dest='is_string', action='store_true',
                         help='Always treat value as a string by quoting it')
+    parser.add_argument('--version', action='version',
+                        version='%(prog)s {version}'.format(version=__version__))
     parser.set_defaults(is_string=False, must_exist=False)
     args = parser.parse_args()
 
