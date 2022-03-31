@@ -17,6 +17,12 @@ jq '.address = "abcde"' test.json|sponge test.json
     
 Does this seem readable or elegant to you?
 
+How about this instead:
+
+```bash
+sde address abcde test.json
+```
+
 `sde` is not a substitute for `jq` or `sed`.
 
 It allows *simple* in-place JSON/YAML value changes, for *simple* data.
