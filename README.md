@@ -56,7 +56,7 @@ sde extra.gender male data.json
 sde database.user john data.yml
 ```
 
-It is possible to modify data in arrays, e.g.:
+It is possible to modify data in arrays using a dotted notation. Let's take another sample:
 
 ```json
 {
@@ -73,7 +73,7 @@ It is possible to modify data in arrays, e.g.:
 }
 ```
 
-Set the first user's `enabled` property to `false`:
+We can set the first user's `enabled` property to `false`:
 
 ```bash
 sde users.0.enabled false data.json
