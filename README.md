@@ -79,7 +79,7 @@ We can set the first user's `enabled` property to `false`:
 sde users.0.enabled false data.json
 ```
 
-## Installation for CentOS/RHEL 7, 8 or Amazon Linux 2
+## Installation for CentOS/RHEL 7, 8 or Amazon Linux 2, or Fedora Linux
 
 ```bash
 sudo yum -y install https://extras.getpagespeed.com/release-latest.rpm
