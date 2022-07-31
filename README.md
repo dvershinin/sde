@@ -25,7 +25,7 @@ sde address abcde test.json
 
 `sde` is not a substitute for `jq` or `sed`.
 
-It allows *simple* in-place JSON/YAML value changes, for *simple* data.
+It allows *simple* in-place JSON/YAML value changes, for *structured* data.
 
 ### Sample JSON
 
