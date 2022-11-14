@@ -24,15 +24,17 @@ if sys.version_info[0] >= 3:
 
 def edit_file(key, value, file, fmt, must_exist=False):
     data = DottedDict(read_file(file, fmt))
-    if must_exist:
-        try:
-            # this is the way I found it works for array vals too
-            # e.g. fruits.0.name
-            data[key]
-        except KeyError:
+    try:
+        # this is the way I found it works for array vals too
+        # e.g. fruits.0.name
+        if data[key] == value and type(data[key]) == type(value):
+            # prevents writing to the file is value is matching already
+            return False
+    except KeyError:
+        if must_exist:
             raise ValueError('{} is not present in {}'.format(key, file))
     data[key] = value
-    write_file(file, fmt, data)
+    return write_file(file, fmt, data)
 
 
 def read_file(file, fmt):
@@ -60,6 +62,7 @@ def write_file(file, fmt, data):
             fd.write(to())
             fd.close()
             os.rename(tmp, file)
+            return True
         except Exception:
             # We can assume we can remove it, because we successfully created
             # it with O_EXCL above.
@@ -103,11 +106,13 @@ def main():
     parser.add_argument('file', metavar='<filename>', help='Filename to edit')
     parser.add_argument('-e', '--must-exist', dest='must_exist', action='store_true',
                         help='Throw error and exit if the key does not already exist')
+    parser.add_argument('-m', '--must-change', dest='must_change', action='store_true',
+                        help='Exit with status code 2 if the values already match and file unchanged')
     parser.add_argument('-s', '--string', dest='is_string', action='store_true',
                         help='Always treat value as a string by quoting it')
     parser.add_argument('--version', action='version',
                         version='%(prog)s {version}'.format(version=__version__))
-    parser.set_defaults(is_string=False, must_exist=False)
+    parser.set_defaults(is_string=False, must_exist=False, must_change=False)
     args = parser.parse_args()
 
     if args.is_string:
@@ -123,7 +128,9 @@ def main():
         sys.exit(1)
 
     try:
-        edit_file(args.key, val, args.file, fmt, must_exist=args.must_exist)
+        res = edit_file(args.key, val, args.file, fmt, must_exist=args.must_exist)
+        if args.must_change and res is False:
+            sys.exit(2)
     except ValueError as e:
         print("\033[91mError: \033[0m" + str(e), file=sys.stderr)
         sys.exit(1)

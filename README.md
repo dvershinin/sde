@@ -96,6 +96,8 @@ pip install sde
 
 ## Notes
 
+### Quoting in JSON
+
 Quoting is avoided for `null`, `true`, `false`, and numeric values.
 To ensure that a given value is quoted, use `-s` (or `--string`) option:
 
@@ -103,11 +105,25 @@ To ensure that a given value is quoted, use `-s` (or `--string`) option:
 sde -s key null file.json
 ```
 
+### Force-fail on missing keys
+
 If you must *edit* the file, by ensuring to update only the existing key, use `-e` (`--must-exist`)
 option. The program will exit without adding the key which doesn't exist.
 
 ```bash
 sde -e key val file.json
+```
+
+### Force-fail on unchanged file
+
+If the data is unchanged after running `sde` (values already match), you can force
+a failure exit code `2` by passing the `-m` option:
+
+```bash
+sde -m key sameval file.json
+# > exit code 0
+sde -m key sameval file.json
+# > exit code 2
 ```
 
 ## TODO
