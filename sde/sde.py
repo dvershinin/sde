@@ -43,7 +43,7 @@ def read_file(file, fmt):
         _YAML: yaml.safe_load,
     }[fmt]
     try:
-        with open(file) as fd:
+        with open(file) as fd:  # skipcq: PTC-W6004
             data = load(fd)
     except IOError:
         data = {}
