@@ -25,7 +25,7 @@ if sys.version_info[0] >= 3:
 def edit_file(key, value, file, fmt, must_exist=False):
     data = DottedDict(read_file(file, fmt))
     try:
-        # this is the way I found it works for array vals too
+        # This is the way I found it works for array vals too
         # e.g. fruits.0.name
         if data[key] == value and type(data[key]) == type(value):
             # prevents writing to the file is value is matching already

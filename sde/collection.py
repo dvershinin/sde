@@ -6,7 +6,8 @@ from abc import ABCMeta, abstractmethod
 
 import six
 import yaml
-from six import add_metaclass, string_types as basestring, iteritems
+from six import add_metaclass, string_types, iteritems
+
 
 # this was only introduced in six 1.13.0, but it's too old in RHEL,
 # and we don't want to rebuild its package
@@ -16,7 +17,7 @@ if six.PY2:
 else:
     import collections.abc as collections_abc
 
-SPLIT_REGEX = r"(?<!\\)(\.)"
+SPLIT_REGEX = re.compile(r"(?<!\\)(\.)")
 
 
 def is_dotted_key(key):
@@ -25,20 +26,20 @@ def is_dotted_key(key):
 
 
 def split_key(key, max_keys=0):
-    """Splits a key but allows dots in the key name if they're scaped properly.
+    """Splits a key but allows dots in the key name if they're escaped properly.
 
     Splitting this complex key:
 
-    complex_key = r".dont\.splitme.d\.o\. origen.splitme\.dontsplit.splitme."
+    complex_key = r'.dont\\\\.splitme.d\\\\.o\\\\. origen.splitme\\\\.dontsplit.splitme.'
     split_key(complex_key)
 
     results in:
 
-    ['', r'dont\.splitme', r'd\.o\. origen', r'splitme\.dontsplit', 'splitme', '']
+    ['', r'dont\\\\.splitme', r'd\\\\.o\\\\. origen', r'splitme\\\\.dontsplit', 'splitme', '']
 
 
     Args:
-        key (basestring): The key to be splitted.
+        key (str): The key to be split.
         max_keys (int): The maximum number of keys to be extracted. 0 means no
             limits.
 
@@ -48,7 +49,7 @@ def split_key(key, max_keys=0):
     parts = [x for x in re.split(SPLIT_REGEX, key) if x != "."]
     result = []
     while len(parts) > 0:
-        if max_keys > 0 and len(result) == max_keys:
+        if 0 < max_keys == len(result):
             break
         result.append(parts.pop(0))
 
@@ -60,7 +61,6 @@ def split_key(key, max_keys=0):
 @add_metaclass(ABCMeta)
 class DottedCollection(object):
     """Abstract Base Class for DottedDict and DottedDict"""
-
 
     @classmethod
     def factory(cls, initial=None):
@@ -74,12 +74,10 @@ class DottedCollection(object):
             return DottedDict(initial)
         return initial
 
-
     @classmethod
     def load_json(cls, json_value):
         """Returns a DottedCollection from a JSON string"""
         return cls.factory(json.loads(json_value))
-
 
     @classmethod
     def _factory_by_index(cls, dotted_key):
@@ -88,7 +86,7 @@ class DottedCollection(object):
         If the next key is numeric then returns a DottedList. In other case a
         DottedDict is returned.
         """
-        if not isinstance(dotted_key, basestring):
+        if not isinstance(dotted_key, string_types):
             next_key = str(dotted_key)
         elif not is_dotted_key(dotted_key):
             next_key = dotted_key
@@ -96,7 +94,6 @@ class DottedCollection(object):
             next_key, tmp = split_key(dotted_key, 1)
 
         return DottedCollection.factory([] if next_key.isdigit() else {})
-
 
     def __init__(self, initial):
         """Base constructor. If there are nested dicts or lists they are
@@ -120,7 +117,6 @@ class DottedCollection(object):
             except ValueError:
                 pass
 
-
     def _validate_initial(self, initial):
         """Validates data so no unescaped dotted key is present."""
         if isinstance(initial, list):
@@ -133,41 +129,32 @@ class DottedCollection(object):
                                      "DottedCollection!".format(key))
                 self._validate_initial(item)
 
-
     def __len__(self):
         return len(self.store)
-
 
     def __iter__(self):
         return iter(self.store)
 
-
     def __repr__(self):
         return repr(self.store)
-
 
     def to_json(self):
         return json.dumps(self, cls=DottedJSONEncoder, indent=4)
 
-
     def to_yaml(self):
         return yaml.dump(self, Dumper=DottedYAMLDumper)
-
 
     @abstractmethod
     def __getitem__(self, name):
         raise NotImplementedError
 
-
     @abstractmethod
     def __setitem__(self, name, value):
         raise NotImplementedError
 
-
     @abstractmethod
     def __delitem__(self, name):
         raise NotImplementedError
-
 
     @abstractmethod
     def to_python(self):
@@ -177,23 +164,21 @@ class DottedCollection(object):
 class DottedList(DottedCollection, collections_abc.MutableSequence):
     """A list with support for the dotted path syntax"""
 
-
     def __init__(self, initial=None):
         DottedCollection.__init__(
             self,
             [] if initial is None else list(initial)
         )
 
-
     def __getitem__(self, index):
         if isinstance(index, slice):
             return self.store[index]
 
         if isinstance(index, int) \
-                or (isinstance(index, basestring) and index.isdigit()):
+                or (isinstance(index, string_types) and index.isdigit()):
             return self.store[int(index)]
 
-        if isinstance(index, basestring) and is_dotted_key(index):
+        if isinstance(index, string_types) and is_dotted_key(index):
             my_index, alt_index = split_key(index, 1)
             target = self.store[int(my_index)]
 
@@ -209,11 +194,10 @@ class DottedList(DottedCollection, collections_abc.MutableSequence):
 
         raise IndexError('cannot get %s in %s' % (index, repr(self.store)))
 
-
     def __setitem__(self, index, value):
         if isinstance(index, int) \
-                or (isinstance(index, basestring) and index.isdigit()):
-            # If the index does not exist in the list but it's the same index
+                or (isinstance(index, string_types) and index.isdigit()):
+            # If the index does not exist in the list, but it's the same index
             # we would obtain by appending the value to the list we actually
             # append the value. (***)
             if int(index) not in self.store and int(index) == len(self.store):
@@ -221,7 +205,7 @@ class DottedList(DottedCollection, collections_abc.MutableSequence):
             else:
                 self.store[int(index)] = DottedCollection.factory(value)
 
-        elif isinstance(index, basestring) and is_dotted_key(index):
+        elif isinstance(index, string_types) and is_dotted_key(index):
             my_index, alt_index = split_key(index, 1)
 
             # (***)
@@ -240,13 +224,12 @@ class DottedList(DottedCollection, collections_abc.MutableSequence):
             raise IndexError('cannot use %s as index in %s' % (
                 index, repr(self.store)))
 
-
     def __delitem__(self, index):
         if isinstance(index, int) \
-                or (isinstance(index, basestring) and index.isdigit()):
+                or (isinstance(index, string_types) and index.isdigit()):
             del self.store[int(index)]
 
-        elif isinstance(index, basestring) and is_dotted_key(index):
+        elif isinstance(index, string_types) and is_dotted_key(index):
             my_index, alt_index = split_key(index, 1)
             target = self.store[int(my_index)]
 
@@ -261,7 +244,6 @@ class DottedList(DottedCollection, collections_abc.MutableSequence):
             raise IndexError('cannot delete %s in %s' % (
                 index, repr(self.store)))
 
-
     def to_python(self):
         """Returns a plain python list and converts to plain python objects all
         this object's descendants.
@@ -274,7 +256,6 @@ class DottedList(DottedCollection, collections_abc.MutableSequence):
 
         return result
 
-
     def insert(self, index, value):
         self.store.insert(index, value)
 
@@ -282,18 +263,16 @@ class DottedList(DottedCollection, collections_abc.MutableSequence):
 class DottedDict(DottedCollection, collections_abc.MutableMapping):
     """A dict with support for the dotted path syntax"""
 
-
     def __init__(self, initial=None):
         DottedCollection.__init__(
             self,
             {} if initial is None else dict(initial)
         )
 
-
     def __getitem__(self, k):
         key = self.__keytransform__(k)
 
-        if not isinstance(k, basestring) or not is_dotted_key(key):
+        if not isinstance(k, string_types) or not is_dotted_key(key):
             return self.store[key]
 
         my_key, alt_key = split_key(key, 1)
@@ -309,11 +288,10 @@ class DottedDict(DottedCollection, collections_abc.MutableMapping):
 
         return target[alt_key]
 
-
     def __setitem__(self, k, value):
         key = self.__keytransform__(k)
 
-        if not isinstance(k, basestring):
+        if not isinstance(k, string_types):
             raise KeyError('DottedDict keys must be str or unicode')
         if not is_dotted_key(key):
             self.store[key] = DottedCollection.factory(value)
@@ -325,11 +303,10 @@ class DottedDict(DottedCollection, collections_abc.MutableMapping):
 
             self.store[my_key][alt_key] = value
 
-
     def __delitem__(self, k):
         key = self.__keytransform__(k)
 
-        if not isinstance(k, basestring) or not is_dotted_key(key):
+        if not isinstance(k, string_types) or not is_dotted_key(key):
             del self.store[key]
 
         else:
@@ -345,7 +322,6 @@ class DottedDict(DottedCollection, collections_abc.MutableMapping):
 
             del target[alt_key]
 
-
     def to_python(self):
         """Returns a plain python dict and converts to plain python objects all
         this object's descendants.
@@ -358,9 +334,7 @@ class DottedDict(DottedCollection, collections_abc.MutableMapping):
 
         return result
 
-
     __getattr__ = __getitem__
-
 
     # self.store does not exist before __init__() initializes it
 
@@ -370,18 +344,16 @@ class DottedDict(DottedCollection, collections_abc.MutableMapping):
         else:
             self.__setitem__(key, value)
 
-
     def __delattr__(self, key):
         if key in self.__dict__ or key == 'store':
             object.__delattr__(self, key)
         else:
             self.__delitem__(key)
 
-
     def __contains__(self, k):
         key = self.__keytransform__(k)
 
-        if not isinstance(k, basestring) or not is_dotted_key(key):
+        if not isinstance(k, string_types) or not is_dotted_key(key):
             return self.store.__contains__(key)
 
         my_key, alt_key = split_key(key, 1)
@@ -392,8 +364,8 @@ class DottedDict(DottedCollection, collections_abc.MutableMapping):
 
         return alt_key in target
 
-
-    def __keytransform__(self, key):
+    @staticmethod
+    def __keytransform__(key):
         return key
 
 
@@ -420,9 +392,9 @@ class DottedYAMLDumper(yaml.Dumper):
 
         dumper.add_representer(DottedDict, lambda dumper, data: data.store)
 
-    but we'd have to do it for each type.
+    But we'd have to do it for each type.
 
-    This suggests making a custom dumper for a hiearchy of types:
+    This suggests making a custom dumper for a hierarchy of types:
         https://github.com/yaml/pyyaml/issues/51
     """
 

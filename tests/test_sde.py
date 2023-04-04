@@ -42,7 +42,6 @@ def test_yaml_edit():
     edit_file('age', normalize_val('31'), file, 'YAML')
     edit_file('balance', normalize_val('0'), file, 'YAML')
 
-
     with open(file) as yaml_file:
         data = yaml.safe_load(yaml_file)
         assert data['age'] == 31
