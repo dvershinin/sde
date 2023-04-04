@@ -23,6 +23,7 @@ if sys.version_info[0] >= 3:
 
 
 def edit_file(key, value, file, fmt, must_exist=False):
+    """Edit a file in the specified format."""
     data = DottedDict(read_file(file, fmt))
     try:
         # This is the way I found it works for array vals too
@@ -52,6 +53,7 @@ def read_file(file, fmt):
 
 
 def write_file(file, fmt, data):
+    """Write data to file in the specified format."""
     to = {
         _JSON: data.to_json,
         _YAML: data.to_yaml,
@@ -122,8 +124,8 @@ def main():
 
     extension = os.path.splitext(args.file)[-1].lower()
 
-    fmt = _FORMATS.get(extension, None)
-    if fmt is None:
+    fmt = _FORMATS.get(extension)
+    if not fmt:
         print("\033[91mError: \033[0mUnknown extension: " + extension, file=sys.stderr)
         sys.exit(1)
 

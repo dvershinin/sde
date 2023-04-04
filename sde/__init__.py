@@ -26,7 +26,7 @@ from .sde import edit_file, normalize_val, read_file
 try:
     from logging import NullHandler
 except ImportError:
-    class NullHandler(logging.Handler):
+    class NullHandler(logging.Handler):  # skipcq: PY-A6006
         def emit(self, record):
             pass
 

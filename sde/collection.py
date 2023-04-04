@@ -140,9 +140,11 @@ class DottedCollection(object):
         return repr(self.store)
 
     def to_json(self):
+        """Returns a JSON representation of the DottedCollection"""
         return json.dumps(self, cls=DottedJSONEncoder, indent=4)
 
     def to_yaml(self):
+        """Returns a YAML representation of the DottedCollection"""
         return yaml.dump(self, Dumper=DottedYAMLDumper)
 
     @abstractmethod
@@ -377,6 +379,7 @@ class DottedDict(DottedCollection, collections_abc.MutableMapping):
 
 class DottedJSONEncoder(json.JSONEncoder):
     def default(self, obj):
+        """This is called by the encoder for each object."""
         if isinstance(obj, DottedCollection):
             return obj.store
         return json.JSONEncoder.default(self, obj)
@@ -400,6 +403,7 @@ class DottedYAMLDumper(yaml.Dumper):
     """
 
     def represent_data(self, data):
+        """This is called by the representer for each object."""
         if isinstance(data, DottedCollection):
             return self.represent_data(data.store)
         return super(DottedYAMLDumper, self).represent_data(data)
